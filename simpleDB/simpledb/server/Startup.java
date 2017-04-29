@@ -1,7 +1,12 @@
 package simpledb.server;
 
-import simpledb.remote.*;
-import java.rmi.registry.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
+import simpledb.buffer.BufferMgr;
+import simpledb.file.Block;
+import simpledb.remote.RemoteDriver;
+import simpledb.remote.RemoteDriverImpl;
 
 public class Startup {
    public static void main(String args[]) throws Exception {
@@ -16,5 +21,6 @@ public class Startup {
       reg.rebind("simpledb", d);
       
       System.out.println("database server ready");
+      
    }
 }
