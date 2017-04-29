@@ -1,5 +1,6 @@
 package simpledb.remote;
 
+import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -54,17 +55,19 @@ class RemoteConnectionImpl extends UnicastRemoteObject implements RemoteConnecti
     * and begins a new one.
     */
    void commit() {
-      tx.commit();
-      tx = new Transaction();
-   }
-   
-   /**
-    * Rolls back the current transaction,
-    * and begins a new one.
-    */
-   void rollback() {
-      tx.rollback();
-      tx = new Transaction();
-   }
+	      tx.commit();
+	      tx = new Transaction();
+	      SimpleDB.fileMgr().getFileStatistics();
+	   }
+	   
+	   /**
+	    * Rolls back the current transaction,
+	    * and begins a new one.
+	    */
+	   void rollback() {
+	      tx.rollback();
+	      tx = new Transaction();
+	      SimpleDB.fileMgr().getFileStatistics();
+	   }
 }
 
