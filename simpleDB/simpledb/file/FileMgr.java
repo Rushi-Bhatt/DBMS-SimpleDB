@@ -25,6 +25,8 @@ public class FileMgr {
    private File dbDirectory;
    private boolean isNew;
    private Map<String,FileChannel> openFiles = new HashMap<String,FileChannel>();
+   private static int totalReadBlocks;
+   private static int totalWriteBlocks;
 
    /**
     * Creates a file manager for the specified database.
@@ -60,6 +62,7 @@ public class FileMgr {
          bb.clear();
          FileChannel fc = getFile(blk.fileName());
          fc.read(bb, blk.number() * BLOCK_SIZE);
+         totalReadBlocks++;
       }
       catch (IOException e) {
          throw new RuntimeException("cannot read block " + blk);
@@ -76,6 +79,7 @@ public class FileMgr {
          bb.rewind();
          FileChannel fc = getFile(blk.fileName());
          fc.write(bb, blk.number() * BLOCK_SIZE);
+         totalWriteBlocks++;
       }
       catch (IOException e) {
          throw new RuntimeException("cannot write block" + blk);
@@ -139,4 +143,12 @@ public class FileMgr {
       }
       return fc;
    }
+   
+   public void getFileStatistics(){
+	   System.out.println("Total number of read blocks: " + Integer.toString(totalReadBlocks));
+	   System.out.println("Total number of written blocks: " + Integer.toString(totalWriteBlocks));	   
+	   
+   }
+   
+   
 }
