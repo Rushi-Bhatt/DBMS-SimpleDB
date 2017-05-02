@@ -1,5 +1,8 @@
 package simpledb.remote;
 
+import simpledb.buffer.BasicBufferMgr;
+import simpledb.buffer.BufferMgr;
+import simpledb.file.Block;
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
 import java.rmi.RemoteException;
@@ -58,6 +61,12 @@ class RemoteConnectionImpl extends UnicastRemoteObject implements RemoteConnecti
 	      tx.commit();
 	      tx = new Transaction();
 	      SimpleDB.fileMgr().getFileStatistics();
+	     
+	      BufferMgr bfr;
+	      bfr=SimpleDB.bufferMgr();
+	      bfr.bufferMgr.getStatistics();
+	      
+	      System.out.println("Completed...");
 	   }
 	   
 	   /**
@@ -68,6 +77,13 @@ class RemoteConnectionImpl extends UnicastRemoteObject implements RemoteConnecti
 	      tx.rollback();
 	      tx = new Transaction();
 	      SimpleDB.fileMgr().getFileStatistics();
+	      
+	      BufferMgr bfr;
+	      bfr=SimpleDB.bufferMgr();
+	    
+	      bfr.bufferMgr.getStatistics();
+	      
+	      System.out.println("Completed...");
 	   }
 }
 
