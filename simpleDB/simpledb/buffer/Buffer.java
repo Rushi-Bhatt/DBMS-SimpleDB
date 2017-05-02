@@ -17,13 +17,11 @@ public class Buffer {
 	private Page contents = new Page();
 	private Block blk = null;
 	int pins = 0;
-	private int bufferIndex; // buffer Id
+	private int idx; // buffer Index
 	int modifiedBy = -1; // negative means not modified
-	int logSequenceNumber = -1; // negative means no corresponding log
-								// record
-	boolean alreadyAssigned = false;
-	private int bufferReadCount; // to get buffer read count
-	private int bufferWriteCount; // to get buffer write count
+	int logSequenceNumber = -1; // negative means no corresponding log record
+	private int bufRead; // to get buffer read count
+	private int bufWrite; // to get buffer write count
 
 	/**
 	 * Creates a new buffer, wrapping a new {@link simpledb.file.Page page}.
@@ -36,7 +34,6 @@ public class Buffer {
 	 * first.
 	 */
 	public Buffer() {
-		this(-1); // Call to Buffer to set basic bufferIndexValue
 	}
 
 	/**
@@ -48,36 +45,18 @@ public class Buffer {
 	 *            the byte offset of the page
 	 * @return the integer value at that offset
 	 */
-	// CSC-540 Buffer_Management Overloaded Constructor for initializing index.
 	public Buffer(int index) {
-		bufferIndex = index;
-		System.out.println("Buffer Created");
-		bufferReadCount = 0;
-		bufferWriteCount = 0;
+		idx = index;
+		bufRead = 0;
+		bufWrite = 0;
 	}
 
-	// CSC-540 Buffer_Management Retrieves bufferIndex
 	public Integer getBufferIndex() {
-		if (bufferIndex == -1)
-			return null;
-		else
-			return bufferIndex;
-	}
-
-	// CSC-540 Buffer_Management For outputting buffer Details.
-	public String toString() {
-		String blockDetails;
-		if (blk != null)
-			blockDetails = blk.toString();
-		else
-			blockDetails = "Not allocated";
-
-		String bufferDetails = "BufferId" + bufferIndex + "Pin Count" + pins + "Allocated Block" + blockDetails;
-		return bufferDetails;
-
+			return idx;
 	}
 
 	public int getInt(int offset) {
+		System.out.println("--------"+contents.getInt(offset));
 		return contents.getInt(offset);
 	}
 
@@ -112,14 +91,11 @@ public class Buffer {
 	 *            the LSN of the corresponding log record
 	 */
 	public void setInt(int offset, int val, int txnum, int lsn) {
-		bufferWriteCount++; // increment write count for buffer
-		System.out.print("Buffer " + bufferIndex + " lsn=" + lsn);
 		modifiedBy = txnum;
-		System.out.println(" modified by=" + modifiedBy);
-		if (lsn >= 0)
-			logSequenceNumber = lsn;
-		contents.setInt(offset, val);
-
+	      if (lsn >= 0)
+		      logSequenceNumber = lsn;
+	      contents.setInt(offset, val);
+	    bufWrite++;
 	}
 
 	/**
@@ -139,13 +115,11 @@ public class Buffer {
 	 *            the LSN of the corresponding log record
 	 */
 	public void setString(int offset, String val, int txnum, int lsn) {
-		bufferWriteCount++; // increment write count for buffer
-		System.out.print("Buffer " + bufferIndex + " lsn=" + lsn);
 		modifiedBy = txnum;
-		System.out.println("modified by=" + modifiedBy);
 		if (lsn >= 0)
 			logSequenceNumber = lsn;
 		contents.setString(offset, val);
+		bufWrite++;
 	}
 
 	/**
@@ -175,7 +149,7 @@ public class Buffer {
 	 */
 	void pin() {
 		pins++;
-		bufferReadCount++; //Increasing buffer read count
+		bufRead++;
 	}
 
 	/**
@@ -216,7 +190,6 @@ public class Buffer {
 	 *            a reference to the data block
 	 */
 	void assignToBlock(Block b) {
-		alreadyAssigned = true;
 		flush();
 		blk = b;
 		contents.read(blk);
@@ -234,20 +207,17 @@ public class Buffer {
 	 *            a page formatter, used to initialize the page
 	 */
 	void assignToNew(String filename, PageFormatter fmtr) {
-		alreadyAssigned = true;
 		flush();
 		fmtr.format(contents);
 		blk = contents.append(filename);
 		pins = 0;
 		
 	}
-
-	//CSC-540 Buffer Management Gives the number of times buffer is read
+	
 	public int getReadCount() {
-		return bufferReadCount;
+		return bufRead;
 	}
-	//CSC-540 Buffer Management Gives the number of times buffer is written
 	public int getWriteCount() {
-		return bufferWriteCount;
+		return bufWrite;
 	}
 }
